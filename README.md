@@ -32,8 +32,11 @@ The core insight behind RAG (Retrieval-Augmented Generation) is that you don't n
 ---
 
 ## System Architecture
+### Local Architecture
+![Local Architecture](assets/rag_architecture_diagram.svg)
 
-![Architecture](assets/rag_architecture_diagram.svg)
+### Cloud Architecture
+![Cloud Architecture](assets/aws_rag_architecture_diagram.svg)
 
 ---
 

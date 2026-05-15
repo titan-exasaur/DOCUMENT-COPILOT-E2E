@@ -17,3 +17,6 @@ __pycache__/
 
 # data folder
 data/
+
+# AWS credentials
+document-copilot-rsa.pem
