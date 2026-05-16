@@ -20,4 +20,5 @@ tqdm
 openai
 pypdf
 pymongo
+requests-aws4auth
 -e .
