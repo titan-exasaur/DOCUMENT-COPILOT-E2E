@@ -17,4 +17,6 @@ scikit-learn
 requests
 python-dotenv
 tqdm
+openai
+pypdf
 -e .
