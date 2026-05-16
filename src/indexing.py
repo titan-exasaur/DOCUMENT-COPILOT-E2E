@@ -15,7 +15,8 @@ def create_index_if_not_exists(client):
                 "embedding": {
                     "type": "knn_vector",
                     "dimension": EMBEDDING_DIM
-                }
+                },
+                "doc_hash": {"type": "keyword"}
             }
         }
     }
@@ -37,13 +38,21 @@ def document_indexing(chunks, embeddings, client):
 
     actions = []
 
-    for i, (chunk, embedding) in enumerate(zip(chunks, embeddings)):
+    for i, (doc, embedding) in enumerate(zip(chunks, embeddings)):
+
+        text_value = doc["text"]
+
+        # FORCE STRING SAFETY (CRITICAL FIX)
+        if not isinstance(text_value, str):
+            text_value = str(text_value)
+
         actions.append({
             "_index": INDEX_NAME,
             "_id": i,
             "_source": {
-                "text": chunk,
-                "embedding": embedding.tolist()
+                "text": text_value,
+                "embedding": embedding.tolist(),
+                "doc_hash": doc.get("doc_hash", None)
             }
         })
 

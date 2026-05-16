@@ -237,7 +237,14 @@ if pdf_file is not None:
         # =====================================
 
         with st.spinner("Chunking document..."):
-            texts = [doc["text"] for doc in pdf_text]
+            texts = []
+
+            for doc in pdf_text:
+                if isinstance(doc["text"], str):
+                    texts.append(doc["text"])
+                else:
+                    texts.append(str(doc["text"]))
+
             chunks = chunk_text(texts)
 
         st.info(f"Total Chunks: {len(chunks)}")
@@ -260,17 +267,17 @@ if pdf_file is not None:
 
             create_index_if_not_exists(opensearch_client)
 
-            # inject doc_hash into indexing without changing function signature
-            chunks_with_hash = [
+            documents = [
                 {
                     "text": chunk,
+                    "embedding": embedding,
                     "doc_hash": pdf_hash
                 }
-                for chunk in chunks
+                for chunk, embedding in zip(chunks, embeddings)
             ]
 
             document_indexing(
-                chunks=chunks_with_hash,
+                chunks=documents,
                 embeddings=embeddings,
                 client=opensearch_client
             )
