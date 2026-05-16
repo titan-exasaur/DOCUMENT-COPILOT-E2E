@@ -153,6 +153,18 @@ pdf_file = st.file_uploader(
 
 
 # =========================
+# BATCH EMBEDDING FIX
+# =========================
+
+def batch_embed(model, chunks, batch_size=64):
+    embeddings = []
+    for i in range(0, len(chunks), batch_size):
+        batch = chunks[i:i + batch_size]
+        embeddings.extend(model.encode(batch))
+    return embeddings
+
+
+# =========================
 # MAIN FLOW
 # =========================
 
@@ -173,17 +185,17 @@ if pdf_file is not None:
     if st.session_state.processed_pdf_hash != pdf_hash:
 
         # =====================================
-        # RESET INDEX TO AVOID CONTAMINATION
+        # INDEX CLEAN SAFETY (NO DELETE)
         # =====================================
 
         INDEX_NAME = "document-index"
 
         try:
-            if opensearch_client.indices.exists(index=INDEX_NAME):
-                opensearch_client.indices.delete(index=INDEX_NAME)
-
+            if not opensearch_client.indices.exists(index=INDEX_NAME):
+                create_index_if_not_exists(opensearch_client)
         except Exception as e:
-            st.error(f"Index cleanup failed: {e}")
+            st.error(f"Index check failed: {e}")
+            st.stop()
 
         # =====================================
         # UPLOAD TO S3
@@ -194,15 +206,18 @@ if pdf_file is not None:
         s3_filename = f"{upload_time}_{pdf_file.name}"
 
         try:
-
             s3_client.put_object(
                 Bucket=S3_BUCKET_NAME,
                 Key=s3_filename,
-                Body=pdf_bytes
+                Body=pdf_bytes,
+                ContentType="application/pdf",
+                Metadata={
+                    "doc_hash": pdf_hash,
+                    "upload_time": upload_time
+                }
             )
 
             st.success(f"PDF uploaded to S3: {s3_filename}")
-
             st.session_state.s3_file_key = s3_filename
 
         except Exception as e:
@@ -213,7 +228,6 @@ if pdf_file is not None:
         # =====================================
 
         with st.spinner("Loading PDF..."):
-
             pdf_text = document_loader(pdf_file)
 
         st.success("PDF loaded successfully")
@@ -223,20 +237,18 @@ if pdf_file is not None:
         # =====================================
 
         with st.spinner("Chunking document..."):
-
             texts = [doc["text"] for doc in pdf_text]
-
             chunks = chunk_text(texts)
 
         st.info(f"Total Chunks: {len(chunks)}")
 
         # =====================================
-        # EMBEDDINGS
+        # EMBEDDINGS (BATCH FIXED)
         # =====================================
 
         with st.spinner("Generating embeddings..."):
-
-            model, embeddings = embedding_text(chunks)
+            model, _ = embedding_text(chunks)
+            embeddings = batch_embed(model, chunks)
 
         st.info(f"Total Embeddings: {len(embeddings)}")
 
@@ -248,8 +260,17 @@ if pdf_file is not None:
 
             create_index_if_not_exists(opensearch_client)
 
+            # inject doc_hash into indexing without changing function signature
+            chunks_with_hash = [
+                {
+                    "text": chunk,
+                    "doc_hash": pdf_hash
+                }
+                for chunk in chunks
+            ]
+
             document_indexing(
-                chunks=chunks,
+                chunks=chunks_with_hash,
                 embeddings=embeddings,
                 client=opensearch_client
             )
@@ -261,11 +282,8 @@ if pdf_file is not None:
         # =====================================
 
         st.session_state.processed_pdf_hash = pdf_hash
-
         st.session_state.model = model
-
         st.session_state.chunks = chunks
-
         st.session_state.indexed = True
 
     else:
@@ -273,7 +291,6 @@ if pdf_file is not None:
         st.success("Using cached embeddings and OpenSearch index")
 
         model = st.session_state.model
-
         chunks = st.session_state.chunks
 
     # =========================================
@@ -284,18 +301,23 @@ if pdf_file is not None:
 
     st.markdown("## 🔍 Ask Your Document")
 
-    query = st.text_input(
-        "Enter your query"
-    )
+    query = st.text_input("Enter your query")
 
     if query:
+
+        # =====================================
+        # SAFETY CHECK
+        # =====================================
+
+        if not st.session_state.indexed or model is None:
+            st.error("Index not ready. Please upload and process a document first.")
+            st.stop()
 
         # =====================================
         # QUERY EMBEDDING
         # =====================================
 
         with st.spinner("Embedding query..."):
-
             query_embedding = model.encode(query)
 
         # =====================================
@@ -331,9 +353,7 @@ if pdf_file is not None:
         st.success(rag_text)
 
     else:
-
         st.warning("Write a query")
 
 else:
-
     st.info("Upload a PDF to begin analysis")
