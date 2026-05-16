@@ -1,27 +1,25 @@
-from sentence_transformers import SentenceTransformer
+import os
 from typing import List
-import numpy as np
 
-# Load model ONCE (global scope)
-model = SentenceTransformer('all-MiniLM-L6-v2')
 
 def embedding_text(chunks: List[str], debug: bool = False):
     """
-    Converts text chunks into embedding vectors.
-    
-    Args:
-        chunks: List of text strings
-    
-    Returns:
-        embedding model
-        numpy array of embeddings
+    Original function — local SentenceTransformer embeddings.
+    Used by local pipeline on EC2.
     """
+    from sentence_transformers import SentenceTransformer
+    model = SentenceTransformer("all-MiniLM-L6-v2")
+    embeddings = model.encode(chunks, show_progress_bar=debug)
+    return embeddings.tolist()
 
-    embeddings = model.encode(chunks)
 
-    if debug:
-        print(f"Number of embeddings: {len(embeddings)}")
-        print(f"Embedding dimension: {len(embeddings[0])}")
-        print(f"First embedding sample: {embeddings[0][:5]}...")
-
-    return model, embeddings
+def embed_chunks_api(chunks: List[str], client) -> List[List[float]]:
+    """
+    Lambda function — embeds chunks via OpenAI API.
+    No local model needed.
+    """
+    response = client.embeddings.create(
+        model="text-embedding-3-small",
+        input=chunks
+    )
+    return [item.embedding for item in response.data]

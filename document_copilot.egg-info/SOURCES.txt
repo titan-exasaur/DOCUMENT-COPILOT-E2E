@@ -5,5 +5,12 @@ document_copilot.egg-info/SOURCES.txt
 document_copilot.egg-info/dependency_links.txt
 document_copilot.egg-info/top_level.txt
 src/__init__.py
-src/helper.py
-src/prompt.py
+src/chunking.py
+src/embeddings.py
+src/generation.py
+src/indexing.py
+src/ingestion.py
+src/mongodb_handler.py
+src/opensearch_client.py
+src/query_embedding.py
+src/retrieval.py
