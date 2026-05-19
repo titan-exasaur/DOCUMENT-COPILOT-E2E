@@ -1,0 +1,137 @@
+<svg width="100%" viewBox="0 0 680 920" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    text { font-family: Inter, system-ui, sans-serif; fill: #1f2937; }
+    .lane { fill: #f3f4f6; opacity: 0.5; stroke: #d1d5db; stroke-width: 0.5; }
+    .phase { font-size: 12px; font-style: italic; fill: #6b7280; }
+    .title { font-size: 14px; font-weight: 500; fill: #1f2937; }
+    .subtitle { font-size: 12px; font-weight: 400; fill: #374151; }
+    .legend-text { font-size: 12px; font-weight: 400; fill: #1f2937; }
+    .arrow-label { font-size: 11px; fill: #1f2937; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+
+  <!-- Swimlane backgrounds -->
+  <rect x="30" y="40" width="620" height="150" rx="12" class="lane"/>
+  <rect x="30" y="220" width="620" height="220" rx="12" class="lane"/>
+  <rect x="30" y="470" width="620" height="160" rx="12" class="lane"/>
+  <rect x="30" y="660" width="620" height="150" rx="12" class="lane"/>
+
+  <!-- Phase labels -->
+  <text x="40" y="30" class="phase">Ingestion</text>
+  <text x="40" y="210" class="phase">Processing</text>
+  <text x="40" y="460" class="phase">Retrieval</text>
+  <text x="40" y="650" class="phase">Generation</text>
+
+  <!-- Ingestion boxes -->
+  <rect x="60" y="85" width="180" height="70" rx="8" fill="#8b5cf6" stroke="#6d28d9" stroke-width="0.5"/>
+  <text x="150" y="110" class="title" text-anchor="middle" dominant-baseline="central">EC2 Streamlit UI</text>
+  <text x="150" y="132" class="subtitle" text-anchor="middle" dominant-baseline="central">PDF upload interface</text>
+
+  <rect x="310" y="85" width="160" height="70" rx="8" fill="#f59e0b" stroke="#b45309" stroke-width="0.5"/>
+  <text x="390" y="110" class="title" text-anchor="middle" dominant-baseline="central">Amazon S3</text>
+  <text x="390" y="132" class="subtitle" text-anchor="middle" dominant-baseline="central">Raw PDF storage</text>
+
+  <rect x="520" y="85" width="120" height="70" rx="8" fill="#fb7185" stroke="#be123c" stroke-width="0.5"/>
+  <text x="580" y="110" class="title" text-anchor="middle" dominant-baseline="central">Lambda</text>
+  <text x="580" y="132" class="subtitle" text-anchor="middle" dominant-baseline="central">S3 event trigger</text>
+
+  <!-- Ingestion arrows -->
+  <path d="M240 120 L310 120" fill="none" stroke="#000000" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="275" y="108" class="arrow-label" text-anchor="middle">Upload PDF</text>
+
+  <path d="M470 120 L520 120" fill="none" stroke="#000000" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="495" y="108" class="arrow-label" text-anchor="middle">Object event</text>
+
+  <!-- Processing boxes -->
+  <rect x="55" y="285" width="140" height="70" rx="8" fill="#fb7185" stroke="#be123c" stroke-width="0.5"/>
+  <text x="125" y="310" class="title" text-anchor="middle" dominant-baseline="central">PDF extraction</text>
+  <text x="125" y="332" class="subtitle" text-anchor="middle" dominant-baseline="central">pdfplumber / PyMuPDF</text>
+
+  <rect x="240" y="285" width="150" height="70" rx="8" fill="#fb7185" stroke="#be123c" stroke-width="0.5"/>
+  <text x="315" y="310" class="title" text-anchor="middle" dominant-baseline="central">Chunking</text>
+  <text x="315" y="332" class="subtitle" text-anchor="middle" dominant-baseline="central">LangChain overlap split</text>
+
+  <rect x="435" y="285" width="170" height="70" rx="8" fill="#14b8a6" stroke="#0f766e" stroke-width="0.5"/>
+  <text x="520" y="310" class="title" text-anchor="middle" dominant-baseline="central">Embedding layer</text>
+  <text x="520" y="332" class="subtitle" text-anchor="middle" dominant-baseline="central">MiniLM-L6-v2 / Bedrock</text>
+
+  <rect x="225" y="385" width="220" height="70" rx="8" fill="#3b82f6" stroke="#1d4ed8" stroke-width="0.5"/>
+  <text x="335" y="410" class="title" text-anchor="middle" dominant-baseline="central">Amazon OpenSearch</text>
+  <text x="335" y="432" class="subtitle" text-anchor="middle" dominant-baseline="central">Bulk vector indexing k-NN</text>
+
+  <!-- Processing arrows -->
+  <path d="M195 320 L240 320" fill="none" stroke="#000000" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M390 320 L435 320" fill="none" stroke="#000000" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M520 355 L520 370 L445 370 L445 385" fill="none" stroke="#000000" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="492" y="362" class="arrow-label" text-anchor="middle">Bulk index</text>
+
+  <!-- Cross-lane: Lambda → PDF extraction -->
+  <path d="M580 155 L580 250 L125 250 L125 285" fill="none" stroke="#000000" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="400" y="242" class="arrow-label" text-anchor="middle">Invoke processing pipeline</text>
+
+  <!-- Retrieval boxes -->
+  <rect x="60" y="525" width="180" height="70" rx="8" fill="#8b5cf6" stroke="#6d28d9" stroke-width="0.5"/>
+  <text x="150" y="550" class="title" text-anchor="middle" dominant-baseline="central">EC2 Streamlit UI</text>
+  <text x="150" y="572" class="subtitle" text-anchor="middle" dominant-baseline="central">User query submission</text>
+
+  <rect x="285" y="525" width="160" height="70" rx="8" fill="#14b8a6" stroke="#0f766e" stroke-width="0.5"/>
+  <text x="365" y="550" class="title" text-anchor="middle" dominant-baseline="central">Query embedding</text>
+  <text x="365" y="572" class="subtitle" text-anchor="middle" dominant-baseline="central">Semantic vector encoding</text>
+
+  <rect x="490" y="525" width="150" height="70" rx="8" fill="#3b82f6" stroke="#1d4ed8" stroke-width="0.5"/>
+  <text x="565" y="550" class="title" text-anchor="middle" dominant-baseline="central">ANN search</text>
+  <text x="565" y="572" class="subtitle" text-anchor="middle" dominant-baseline="central">HNSW top-k retrieval</text>
+
+  <!-- Retrieval arrows -->
+  <path d="M240 560 L285 560" fill="none" stroke="#000000" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M445 560 L490 560" fill="none" stroke="#000000" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Generation boxes -->
+  <rect x="90" y="715" width="180" height="70" rx="8" fill="#3b82f6" stroke="#1d4ed8" stroke-width="0.5"/>
+  <text x="180" y="740" class="title" text-anchor="middle" dominant-baseline="central">Retrieved chunks</text>
+  <text x="180" y="762" class="subtitle" text-anchor="middle" dominant-baseline="central">Context assembly</text>
+
+  <rect x="330" y="715" width="190" height="70" rx="8" fill="#14b8a6" stroke="#0f766e" stroke-width="0.5"/>
+  <text x="425" y="740" class="title" text-anchor="middle" dominant-baseline="central">LLM inference</text>
+  <text x="425" y="762" class="subtitle" text-anchor="middle" dominant-baseline="central">OpenAI API</text>
+
+  <rect x="560" y="715" width="90" height="70" rx="8" fill="#8b5cf6" stroke="#6d28d9" stroke-width="0.5"/>
+  <text x="605" y="740" class="title" text-anchor="middle" dominant-baseline="central">UI</text>
+  <text x="605" y="762" class="subtitle" text-anchor="middle" dominant-baseline="central">Streamed answer</text>
+
+  <!-- Generation arrows -->
+  <path d="M270 750 L330 750" fill="none" stroke="#000000" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="300" y="738" class="arrow-label" text-anchor="middle">Prompt + context</text>
+
+  <path d="M520 750 L560 750" fill="none" stroke="#000000" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="540" y="738" class="arrow-label" text-anchor="middle">Response stream</text>
+
+  <!-- Retrieval → Generation cross-lane -->
+  <path d="M565 595 L565 650 L180 650 L180 715" fill="none" stroke="#000000" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="400" y="642" class="arrow-label" text-anchor="middle">Top-k semantic matches</text>
+
+  <!-- IAM + CloudWatch bar -->
+  <rect x="30" y="835" width="620" height="45" rx="10" fill="#22c55e" stroke="#15803d" stroke-width="0.5"/>
+  <text x="340" y="850" class="title" text-anchor="middle" dominant-baseline="central">IAM roles + CloudWatch</text>
+  <text x="340" y="870" class="subtitle" text-anchor="middle" dominant-baseline="central">Applies to every service</text>
+
+  <!-- Legend — horizontal -->
+  <rect x="30" y="892" width="14" height="14" rx="3" fill="#8b5cf6"/>
+  <text x="50" y="899" class="legend-text" dominant-baseline="central">EC2 / UI</text>
+
+  <rect x="115" y="892" width="14" height="14" rx="3" fill="#f59e0b"/>
+  <text x="135" y="899" class="legend-text" dominant-baseline="central">S3 storage</text>
+
+  <rect x="215" y="892" width="14" height="14" rx="3" fill="#fb7185"/>
+  <text x="235" y="899" class="legend-text" dominant-baseline="central">Lambda / compute</text>
+
+  <rect x="355" y="892" width="14" height="14" rx="3" fill="#14b8a6"/>
+  <text x="375" y="899" class="legend-text" dominant-baseline="central">Embedding layer</text>
+
+  <rect x="470" y="892" width="14" height="14" rx="3" fill="#3b82f6"/>
+  <text x="490" y="899" class="legend-text" dominant-baseline="central">OpenSearch / vector DB</text>
+</svg>
